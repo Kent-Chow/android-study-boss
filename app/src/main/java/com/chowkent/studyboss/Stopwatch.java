@@ -1,7 +1,6 @@
 package com.chowkent.studyboss;
 
 public class Stopwatch {
-
     private long startTime;
     private long stopTime;
     private long timeBuffer;

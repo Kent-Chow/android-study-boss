@@ -1,42 +1,72 @@
 package com.chowkent.studyboss;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.Timer;
+
 public class MainActivity extends AppCompatActivity {
+    private static String TAG = "MainActivity";
     private Button startButton;
     private Button pauseButton;
     private Button resetButton;
 
     private TextView timerValue;
 
-    private long startTime = 0L;
-
     private Handler customHandler = new Handler();
 
-    long timeInMilliseconds = 0L;
-    long timeSwapBuff = 0L;
-    long updatedTime = 0L;
+    private TimerService timerService;
+    private ServiceConnection timerServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            timerService = ((TimerService.LocalBinder)service).getService();
+            Log.d(TAG, "onServiceConnected() called!");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            timerService = null;
+        }
+    };
+
+    private void bindTimerService() {
+        bindService(new Intent(this, TimerService.class), timerServiceConnection, Context.BIND_AUTO_CREATE);
+        Log.d(TAG, "bindTimerService() called!");
+    }
+
+    private void unbindTimerService() {
+        if (timerServiceConnection != null) {
+            unbindService(timerServiceConnection);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        startService(new Intent(this, TimerService.class));
+        bindTimerService();
+
         timerValue = (TextView) findViewById(R.id.timer);
 
         startButton = (Button) findViewById(R.id.start_button);
-
         startButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                startTime = SystemClock.uptimeMillis();
-                customHandler.postDelayed(updateTimerThread, 0);
+                timerService.start();
                 pauseButton.setEnabled(true);
                 startButton.setEnabled(false);
 
@@ -45,12 +75,10 @@ public class MainActivity extends AppCompatActivity {
 
         pauseButton = (Button) findViewById(R.id.pause_button);
         pauseButton.setEnabled(false);
-
         pauseButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                timeSwapBuff += timeInMilliseconds;
-                customHandler.removeCallbacks(updateTimerThread);
+                timerService.pause();
                 pauseButton.setEnabled(false);
                 startButton.setEnabled(true);
 
@@ -58,41 +86,33 @@ public class MainActivity extends AppCompatActivity {
         });
 
         resetButton = (Button) findViewById(R.id.reset_button);
-
         resetButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                startTime = 0L;
-                timeInMilliseconds = 0L;
-                timeSwapBuff = 0L;
-                updatedTime = 0L;
-                timerValue.setText(getResources().getString(R.string.timer_string));
-                customHandler.removeCallbacks(updateTimerThread);
+                timerService.reset();
                 pauseButton.setEnabled(false);
                 startButton.setEnabled(true);
 
             }
         });
+
+        customHandler.postDelayed(updateTimerValue, 0);
+        Log.d(TAG, "Successfully created!");
     }
 
-    private Runnable updateTimerThread = new Runnable() {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindTimerService();
+    }
 
+    private Runnable updateTimerValue = new Runnable() {
+        @Override
         public void run() {
-
-            timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
-
-            updatedTime = timeSwapBuff + timeInMilliseconds;
-
-            int secs = (int) (updatedTime / 1000);
-            int mins = secs / 60;
-            int hours = mins / 60;
-            secs = secs % 60;
-            int seconds100 = (int) ((updatedTime / 10) % 100);
-            timerValue.setText(String.format("%02d", hours) + ":"
-                    + String.format("%02d", mins) + ":"
-                    + String.format("%02d", secs) + ":"
-                    + String.format("%02d", seconds100));
-            customHandler.postDelayed(this, 0);
+            if (timerService != null) {
+                timerValue.setText(timerService.getFormattedElapsedTime());
+                customHandler.postDelayed(this, 0);
+            }
         }
     };
 }
