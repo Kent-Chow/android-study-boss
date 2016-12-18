@@ -1,5 +1,7 @@
 package com.chowkent.studyboss;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -17,6 +19,7 @@ public class TimerService extends Service {
     }
 
     private Stopwatch stopwatch;
+    private Notification notification;
     private LocalBinder binder = new LocalBinder();
 
     @Nullable
@@ -29,6 +32,19 @@ public class TimerService extends Service {
     public void onCreate() {
         super.onCreate();
         stopwatch = new Stopwatch();
+
+        CharSequence text = getText(R.string.notification_string);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+
+        Notification notification = new Notification.Builder(this)
+                .setSmallIcon(R.drawable.icon)
+                .setTicker(text)
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(contentIntent)
+                .build();
+
+        startForeground(1, notification);
         Log.d(TAG, "Successfully created!");
     }
 
@@ -69,4 +85,5 @@ public class TimerService extends Service {
     public boolean isRunning() {
         return stopwatch.isRunning();
     }
+
 }
