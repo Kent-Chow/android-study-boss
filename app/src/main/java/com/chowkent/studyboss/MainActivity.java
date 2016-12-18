@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             timerService = ((TimerService.LocalBinder)service).getService();
+            init();
             Log.d(TAG, "onServiceConnected() called!");
         }
 
@@ -59,7 +60,9 @@ public class MainActivity extends AppCompatActivity {
 
         startService(new Intent(this, TimerService.class));
         bindTimerService();
+    }
 
+    protected void init() {
         timerValue = (TextView) findViewById(R.id.timer);
 
         startButton = (Button) findViewById(R.id.start_button);
@@ -69,12 +72,12 @@ public class MainActivity extends AppCompatActivity {
                 timerService.start();
                 pauseButton.setEnabled(true);
                 startButton.setEnabled(false);
+                customHandler.postDelayed(updateTimerValue, 0);
 
             }
         });
 
         pauseButton = (Button) findViewById(R.id.pause_button);
-        pauseButton.setEnabled(false);
         pauseButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
@@ -95,6 +98,16 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        if (timerService != null && timerService.isRunning()) {
+            Log.d("buttons", "timer is still running!");
+            startButton.setEnabled(false);
+            pauseButton.setEnabled(true);
+        } else {
+            Log.d("buttons", "timer is not running!");
+            startButton.setEnabled(true);
+            pauseButton.setEnabled(false);
+        }
 
         customHandler.postDelayed(updateTimerValue, 0);
         Log.d(TAG, "Successfully created!");
