@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 public class TimerService extends Service {
@@ -34,12 +35,14 @@ public class TimerService extends Service {
         stopwatch = new Stopwatch();
 
         CharSequence text = getText(R.string.notification_string);
+        CharSequence title = getText(R.string.app_name);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
 
-        Notification notification = new Notification.Builder(this)
+        notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.icon)
-                .setTicker(text)
+                .setContentTitle(title)
+                .setContentText(text)
                 .setWhen(System.currentTimeMillis())
                 .setContentIntent(contentIntent)
                 .build();
