@@ -74,10 +74,11 @@ public class TimerService extends Service {
 
     public String getFormattedElapsedTime() {
         long elapsedTime = getElapsedTime();
-        int secs = (int) (elapsedTime / 1000) % 60;
+        int secs = (int) (elapsedTime / 1000);
         int mins = secs / 60;
         int hours = mins / 60;
         int seconds100 = (int) ((elapsedTime / 10) % 100);
+        secs = secs % 60;
 
         return (String.format("%02d", hours) + ":"
                 + String.format("%02d", mins) + ":"
