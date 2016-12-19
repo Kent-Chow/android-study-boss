@@ -9,6 +9,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
+        </activity>
+
+        <activity android:name=".TimerActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -16,7 +19,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".TimerService" />
+        <service android:name=".TimerService"/>
     </application>
 
 </manifest>
