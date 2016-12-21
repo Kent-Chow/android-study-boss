@@ -1,7 +1,13 @@
 package com.chowkent.studyboss;
 
 import android.app.ListActivity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -10,18 +16,52 @@ import java.util.ArrayList;
 
 public class TimerActivity extends ListActivity {
     private static final String[] items = {"Time1", "Time2", "Time3", "Time4", "Time5", "Time6", "Time7", "Time8", "Time9"};
+    private Handler customHandler = new Handler();
+
+    private TimerService timerService;
+    private ServiceConnection timerServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            timerService = ((TimerService.LocalBinder)service).getService();
+            init();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            timerService = null;
+        }
+    };
+
+    private void bindTimerService() {
+        bindService(new Intent(this, TimerService.class), timerServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void unbindTimerService() {
+        if (timerServiceConnection != null) {
+            unbindService(timerServiceConnection);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer);
+        startService(new Intent(this, TimerService.class));
+        bindTimerService();
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindTimerService();
+    }
+
+    protected void init() {
         ArrayList<RowData> list = new ArrayList<>();
-
         for (String s : items) {
             list.add(new RowData(s));
         }
-
         setListAdapter(new TimerAdapter(list));
     }
 
@@ -49,7 +89,7 @@ public class TimerActivity extends ListActivity {
 
             holder.startButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    rowData.timerValue = "Start!";
+                    timerService.start();
                     rowData.isPauseButtonEnabled = true;
                     rowData.isStartButtonEnabled = false;
                     updateButtons(holder, rowData);
@@ -58,7 +98,7 @@ public class TimerActivity extends ListActivity {
 
             holder.pauseButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    rowData.timerValue = "Pause!";
+                    timerService.pause();
                     rowData.isPauseButtonEnabled = false;
                     rowData.isStartButtonEnabled = true;
                     updateButtons(holder, rowData);
@@ -67,7 +107,7 @@ public class TimerActivity extends ListActivity {
 
             holder.resetButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    rowData.timerValue = "Reset!";
+                    timerService.reset();
                     rowData.isPauseButtonEnabled = false;
                     rowData.isStartButtonEnabled = true;
                     updateButtons(holder, rowData);
@@ -80,9 +120,10 @@ public class TimerActivity extends ListActivity {
         }
 
         private void updateButtons(ViewHolder holder, RowData rowData) {
-            holder.timerValue.setText(rowData.timerValue);
+            UpdateRunnable updateTimerValue = new UpdateRunnable(holder, rowData);
             holder.startButton.setEnabled(rowData.isStartButtonEnabled);
             holder.pauseButton.setEnabled(rowData.isPauseButtonEnabled);
+            customHandler.postDelayed(updateTimerValue, 0);
         }
     }
 
@@ -101,6 +142,25 @@ public class TimerActivity extends ListActivity {
 
         public String toString() {
             return timerValue;
+        }
+    }
+
+    public class UpdateRunnable implements Runnable {
+        private ViewHolder holder;
+        private RowData rowData;
+
+        public UpdateRunnable(ViewHolder holder, RowData rowData) {
+            this.holder = holder;
+            this.rowData = rowData;
+        }
+
+        @Override
+        public void run() {
+            if (timerService != null) {
+                rowData.timerValue = timerService.getFormattedElapsedTime();
+                holder.timerValue.setText(rowData.timerValue);
+                customHandler.postDelayed(this, 0);
+            }
         }
     }
 }
