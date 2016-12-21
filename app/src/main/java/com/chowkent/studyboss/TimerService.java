@@ -10,6 +10,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 public class TimerService extends Service {
     private static String TAG = "TimerService";
 
@@ -19,7 +21,7 @@ public class TimerService extends Service {
         }
     }
 
-    private Stopwatch stopwatch;
+    private ArrayList<Stopwatch> stopwatches;
     private Notification notification;
     private LocalBinder binder = new LocalBinder();
 
@@ -32,12 +34,12 @@ public class TimerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        stopwatch = new Stopwatch();
+        stopwatches = new ArrayList<>();
 
         CharSequence text = getText(R.string.notification_string);
         CharSequence title = getText(R.string.app_name);
 
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, TimerActivity.class), 0);
 
         notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.icon)
@@ -56,24 +58,24 @@ public class TimerService extends Service {
         return START_STICKY;
     }
 
-    public void start() {
-        stopwatch.start();
+    public void start(int i) {
+        stopwatches.get(i).start();
     }
 
-    public void pause() {
-        stopwatch.pause();
+    public void pause(int i) {
+        stopwatches.get(i).pause();
     }
 
-    public void reset() {
-        stopwatch.reset();
+    public void reset(int i) {
+        stopwatches.get(i).reset();
     }
 
-    public long getElapsedTime() {
-        return stopwatch.getElapsedTime();
+    public long getElapsedTime(int i) {
+        return stopwatches.get(i).getElapsedTime();
     }
 
-    public String getFormattedElapsedTime() {
-        long elapsedTime = getElapsedTime();
+    public String getFormattedElapsedTime(int i) {
+        long elapsedTime = getElapsedTime(i);
         int secs = (int) (elapsedTime / 1000);
         int mins = secs / 60;
         int hours = mins / 60;
@@ -86,8 +88,14 @@ public class TimerService extends Service {
                 + String.format("%02d", seconds100));
     }
 
-    public boolean isRunning() {
-        return stopwatch.isRunning();
+    public int addStopwatch() {
+        int id = stopwatches.size();
+        stopwatches.add(new Stopwatch());
+        return id;
+    }
+
+    public boolean isRunning(int i) {;
+        return stopwatches.get(i).isRunning();
     }
 
 }

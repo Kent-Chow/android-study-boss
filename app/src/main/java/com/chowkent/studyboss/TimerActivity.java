@@ -61,6 +61,7 @@ public class TimerActivity extends ListActivity {
         ArrayList<RowData> list = new ArrayList<>();
         for (String s : items) {
             list.add(new RowData(s));
+            timerService.addStopwatch();
         }
         setListAdapter(new TimerAdapter(list));
     }
@@ -79,6 +80,7 @@ public class TimerActivity extends ListActivity {
             View row = super.getView(position, convertView, parent);
             final ViewHolder holder;
             final RowData rowData = getRowData(position);
+            final int id = position;
 
             if (row.getTag() == null) {
                 holder = new ViewHolder(row);
@@ -89,38 +91,38 @@ public class TimerActivity extends ListActivity {
 
             holder.startButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    timerService.start();
+                    timerService.start(id);
                     rowData.isPauseButtonEnabled = true;
                     rowData.isStartButtonEnabled = false;
-                    updateButtons(holder, rowData);
+                    updateButtons(holder, rowData, id);
                 }
             });
 
             holder.pauseButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    timerService.pause();
+                    timerService.pause(id);
                     rowData.isPauseButtonEnabled = false;
                     rowData.isStartButtonEnabled = true;
-                    updateButtons(holder, rowData);
+                    updateButtons(holder, rowData, id);
                 }
             });
 
             holder.resetButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    timerService.reset();
+                    timerService.reset(id);
                     rowData.isPauseButtonEnabled = false;
                     rowData.isStartButtonEnabled = true;
-                    updateButtons(holder, rowData);
+                    updateButtons(holder, rowData, id);
                 }
             });
 
-            updateButtons(holder, rowData);
+            updateButtons(holder, rowData, id);
 
             return row;
         }
 
-        private void updateButtons(ViewHolder holder, RowData rowData) {
-            UpdateRunnable updateTimerValue = new UpdateRunnable(holder, rowData);
+        private void updateButtons(ViewHolder holder, RowData rowData, int id) {
+            UpdateRunnable updateTimerValue = new UpdateRunnable(holder, rowData, id);
             holder.startButton.setEnabled(rowData.isStartButtonEnabled);
             holder.pauseButton.setEnabled(rowData.isPauseButtonEnabled);
             customHandler.postDelayed(updateTimerValue, 0);
@@ -148,16 +150,18 @@ public class TimerActivity extends ListActivity {
     public class UpdateRunnable implements Runnable {
         private ViewHolder holder;
         private RowData rowData;
+        private int stopwatchId;
 
-        public UpdateRunnable(ViewHolder holder, RowData rowData) {
+        public UpdateRunnable(ViewHolder holder, RowData rowData, int id) {
             this.holder = holder;
             this.rowData = rowData;
+            this.stopwatchId = id;
         }
 
         @Override
         public void run() {
             if (timerService != null) {
-                rowData.timerValue = timerService.getFormattedElapsedTime();
+                rowData.timerValue = timerService.getFormattedElapsedTime(stopwatchId);
                 holder.timerValue.setText(rowData.timerValue);
                 customHandler.postDelayed(this, 0);
             }

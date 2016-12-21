@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                timerService.start();
+                timerService.start(0);
                 pauseButton.setEnabled(true);
                 startButton.setEnabled(false);
                 customHandler.postDelayed(updateTimerValue, 0);
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         pauseButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                timerService.pause();
+                timerService.pause(0);
                 pauseButton.setEnabled(false);
                 startButton.setEnabled(true);
 
@@ -89,14 +89,14 @@ public class MainActivity extends AppCompatActivity {
         resetButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                timerService.reset();
+                timerService.reset(0);
                 pauseButton.setEnabled(false);
                 startButton.setEnabled(true);
 
             }
         });
 
-        if (timerService != null && timerService.isRunning()) {
+        if (timerService != null && timerService.isRunning(0)) {
             Log.d("buttons", "timer is still running!");
             startButton.setEnabled(false);
             pauseButton.setEnabled(true);
@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             if (timerService != null) {
-                timerValue.setText(timerService.getFormattedElapsedTime());
+                timerValue.setText(timerService.getFormattedElapsedTime(0));
                 customHandler.postDelayed(this, 0);
             }
         }
