@@ -35,6 +35,7 @@ public class TimerActivity extends ListActivity {
 
             holder.startButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
+                    holder.timerValue.setText("Start!");
                     holder.pauseButton.setEnabled(true);
                     holder.startButton.setEnabled(false);
                 }
@@ -42,6 +43,7 @@ public class TimerActivity extends ListActivity {
 
             holder.pauseButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
+                    holder.timerValue.setText("Pause!");
                     holder.pauseButton.setEnabled(false);
                     holder.startButton.setEnabled(true);
                 }
@@ -49,6 +51,7 @@ public class TimerActivity extends ListActivity {
 
             holder.resetButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
+                    holder.timerValue.setText("Reset!");
                     holder.pauseButton.setEnabled(false);
                     holder.startButton.setEnabled(true);
                 }
