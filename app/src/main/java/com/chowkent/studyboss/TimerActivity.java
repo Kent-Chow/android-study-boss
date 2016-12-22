@@ -5,20 +5,29 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TimerActivity extends ListActivity {
-    private static final String[] items = {"Time1", "Time2", "Time3", "Time4", "Time5", "Time6", "Time7", "Time8", "Time9"};
     private Handler customHandler = new Handler();
+    private ArrayList<RowData> list;
+    private TimerAdapter timerAdapter;
 
     private TimerService timerService;
     private ServiceConnection timerServiceConnection = new ServiceConnection() {
@@ -27,6 +36,7 @@ public class TimerActivity extends ListActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             timerService = ((TimerService.LocalBinder)service).getService();
             init();
+            Log.d("DEBUG", "Timer service connected!");
         }
 
         @Override
@@ -49,34 +59,83 @@ public class TimerActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer);
+
+//        if (savedInstanceState != null) {
+//            list = savedInstanceState.getParcelableArrayList("list");
+//        }
+
         startService(new Intent(this, TimerService.class));
         bindTimerService();
+    }
+
+    protected void init() {
+        SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+        Gson gson = new Gson();
+
+        String json = appSharedPrefs.getString("list", "");
+        Type type = new TypeToken<List<RowData>>() {}.getType();
+        list = gson.fromJson(json, type);
+
+        if (list == null) {
+            list = new ArrayList<>();
+        }
+
+        timerAdapter = new TimerAdapter(list);
+        setListAdapter(timerAdapter);
+        Log.d("DEBUG", "INIT called!");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unbindTimerService();
-    }
-
-    protected void init() {
-        ArrayList<RowData> list = new ArrayList<>();
-        for (String s : items) {
-            list.add(new RowData(s));
-            timerService.addStopwatch();
-        }
-        setListAdapter(new TimerAdapter(list));
+        Log.d("DEBUG", "Destroyed!");
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.timer_actions, menu);
-        Log.d("MENU", "Menu inflated!");
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.add:
+                addTimer();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+//        outState.putParcelableArrayList("list", list);
+//        Log.d("DEBUG", "State saved in bundle!");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+        SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(list);
+        prefsEditor.putString("list", json);
+        prefsEditor.commit();
+        Log.d("DEBUG", "State saved in prefs!");
     }
 
     private RowData getRowData(int position) {
         return(((TimerAdapter)getListAdapter()).getItem(position));
+    }
+
+    private void addTimer() {
+        list.add(new RowData(getResources().getString(R.string.timer_string)));
+        timerService.addStopwatch();
+        timerAdapter.notifyDataSetChanged();
     }
 
     class TimerAdapter extends ArrayAdapter<RowData> {
@@ -135,24 +194,6 @@ public class TimerActivity extends ListActivity {
             holder.startButton.setEnabled(rowData.isStartButtonEnabled);
             holder.pauseButton.setEnabled(rowData.isPauseButtonEnabled);
             customHandler.postDelayed(updateTimerValue, 0);
-        }
-    }
-
-    class RowData {
-        public String timerValue;
-        public boolean isStartButtonEnabled;
-        public boolean isPauseButtonEnabled;
-        public boolean isResetButtonEnabled;
-
-        RowData(String timerValue) {
-            this.timerValue = timerValue;
-            isStartButtonEnabled = true;
-            isPauseButtonEnabled = false;
-            isResetButtonEnabled = true;
-        }
-
-        public String toString() {
-            return timerValue;
         }
     }
 
