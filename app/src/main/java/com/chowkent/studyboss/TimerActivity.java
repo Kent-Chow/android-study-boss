@@ -8,6 +8,8 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -64,6 +66,13 @@ public class TimerActivity extends ListActivity {
             timerService.addStopwatch();
         }
         setListAdapter(new TimerAdapter(list));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.timer_actions, menu);
+        Log.d("MENU", "Menu inflated!");
+        return super.onCreateOptionsMenu(menu);
     }
 
     private RowData getRowData(int position) {
