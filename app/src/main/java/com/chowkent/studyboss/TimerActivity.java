@@ -128,6 +128,21 @@ public class TimerActivity extends ListActivity {
         Log.d("DEBUG", "State saved in prefs!");
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+        Gson gson = new Gson();
+
+        String json = appSharedPrefs.getString("list", "");
+        Type type = new TypeToken<List<RowData>>() {}.getType();
+        list = gson.fromJson(json, type);
+
+        if (list == null) {
+            list = new ArrayList<>();
+        }
+    }
+
     private RowData getRowData(int position) {
         return(((TimerAdapter)getListAdapter()).getItem(position));
     }
