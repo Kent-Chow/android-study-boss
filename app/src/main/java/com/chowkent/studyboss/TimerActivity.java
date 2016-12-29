@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -82,6 +83,10 @@ public class TimerActivity extends ListActivity {
 
         timerAdapter = new TimerAdapter(list);
         setListAdapter(timerAdapter);
+        getListView().setLongClickable(true);
+        getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        getListView().setOnItemLongClickListener(new ActionModeHelper(this, getListView()));
+
         Log.d("DEBUG", "INIT called!");
     }
 
@@ -210,6 +215,11 @@ public class TimerActivity extends ListActivity {
             holder.pauseButton.setEnabled(rowData.isPauseButtonEnabled);
             customHandler.postDelayed(updateTimerValue, 0);
         }
+    }
+
+    public boolean deleteTimerAction(int itemId, int position) {
+        //TODO: implement this
+        return false;
     }
 
     public class UpdateRunnable implements Runnable {
