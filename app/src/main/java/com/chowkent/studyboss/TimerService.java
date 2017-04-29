@@ -4,8 +4,10 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -34,6 +36,12 @@ public class TimerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+        SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
+        prefsEditor.clear();
+        prefsEditor.commit();
+
         stopwatches = new ArrayList<>();
 
         CharSequence text = getText(R.string.notification_string);
@@ -50,7 +58,6 @@ public class TimerService extends Service {
                 .build();
 
         startForeground(1, notification);
-        Log.d(TAG, "Successfully created!");
     }
 
     @Override

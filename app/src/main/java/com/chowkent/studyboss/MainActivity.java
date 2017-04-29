@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             timerService = ((TimerService.LocalBinder)service).getService();
             init();
-            Log.d(TAG, "onServiceConnected() called!");
         }
 
         @Override
@@ -41,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void bindTimerService() {
         bindService(new Intent(this, TimerService.class), timerServiceConnection, Context.BIND_AUTO_CREATE);
-        Log.d(TAG, "bindTimerService() called!");
     }
 
     private void unbindTimerService() {
@@ -97,17 +95,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (timerService != null && timerService.isRunning(0)) {
-            Log.d("buttons", "timer is still running!");
             startButton.setEnabled(false);
             pauseButton.setEnabled(true);
         } else {
-            Log.d("buttons", "timer is not running!");
             startButton.setEnabled(true);
             pauseButton.setEnabled(false);
         }
 
         customHandler.postDelayed(updateTimerValue, 0);
-        Log.d(TAG, "Successfully created!");
     }
 
     @Override

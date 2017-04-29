@@ -37,7 +37,6 @@ public class TimerActivity extends ListActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             timerService = ((TimerService.LocalBinder)service).getService();
             init();
-            Log.d("DEBUG", "Timer service connected!");
         }
 
         @Override
@@ -87,14 +86,12 @@ public class TimerActivity extends ListActivity {
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         getListView().setOnItemLongClickListener(new ActionModeHelper(this, getListView()));
 
-        Log.d("DEBUG", "INIT called!");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unbindTimerService();
-        Log.d("DEBUG", "Destroyed!");
     }
 
     @Override
@@ -130,7 +127,6 @@ public class TimerActivity extends ListActivity {
         String json = gson.toJson(list);
         prefsEditor.putString("list", json);
         prefsEditor.commit();
-        Log.d("DEBUG", "State saved in prefs!");
     }
 
     @Override
