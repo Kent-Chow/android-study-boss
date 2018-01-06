@@ -1,5 +1,6 @@
 package com.chowkent.studyboss;
 
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,7 +36,7 @@ public class ActionModeHelper implements ActionMode.Callback, AdapterView.OnItem
 
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-        boolean result = host.deleteTimerAction(item.getItemId(), modeView.getCheckedItemPosition());
+        boolean result = host.deleteTimerAction(modeView.getCheckedItemPosition());
 
         if (item.getItemId() == R.id.delete) {
             activeMode.finish();

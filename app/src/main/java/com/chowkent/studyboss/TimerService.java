@@ -101,8 +101,15 @@ public class TimerService extends Service {
         return id;
     }
 
+    public void removeStopwatch(int i) {
+        stopwatches.remove(i);
+    }
+
     public boolean isRunning(int i) {;
         return stopwatches.get(i).isRunning();
     }
 
+    public boolean checkIfExists(int i) {
+        return i < stopwatches.size();
+    }
 }

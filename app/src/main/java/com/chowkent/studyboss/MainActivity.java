@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+@Deprecated
 public class MainActivity extends AppCompatActivity {
     private static String TAG = "MainActivity";
     private Button startButton;

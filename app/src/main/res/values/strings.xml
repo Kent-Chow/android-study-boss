@@ -6,6 +6,6 @@
     <string name="timer_string">00:00:00:00</string>
     <string name="notification_string">Timer service is running!</string>
     <string name="add">Add</string>
-    <string name="delete_timer">Delete timer</string>
+    <string name="delete_timer"></string>
 
 </resources>

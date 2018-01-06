@@ -57,6 +57,7 @@ public class TimerActivity extends ListActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("DEBUG", "onCreate() was called!");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer);
 
@@ -120,6 +121,7 @@ public class TimerActivity extends ListActivity {
 
     @Override
     protected void onPause() {
+        Log.d("DEBUG", "onPause() was called!");
         super.onPause();
         SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
         SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
@@ -131,6 +133,7 @@ public class TimerActivity extends ListActivity {
 
     @Override
     protected void onResume() {
+        Log.d("DEBUG", "onResume() was called!");
         super.onResume();
         SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
         Gson gson = new Gson();
@@ -149,6 +152,7 @@ public class TimerActivity extends ListActivity {
     }
 
     private void addTimer() {
+        Log.d("DEBUG", "addTimer() was called!");
         list.add(new RowData(getResources().getString(R.string.timer_string)));
         timerService.addStopwatch();
         timerAdapter.notifyDataSetChanged();
@@ -213,9 +217,12 @@ public class TimerActivity extends ListActivity {
         }
     }
 
-    public boolean deleteTimerAction(int itemId, int position) {
-        //TODO: implement this
-        return false;
+    public boolean deleteTimerAction(int position) {
+        // TODO: Clean up delete
+        list.remove(position);
+        timerService.removeStopwatch(position);
+        timerAdapter.notifyDataSetChanged();
+        return true;
     }
 
     public class UpdateRunnable implements Runnable {
@@ -231,7 +238,7 @@ public class TimerActivity extends ListActivity {
 
         @Override
         public void run() {
-            if (timerService != null) {
+            if (timerService != null && timerService.checkIfExists(stopwatchId)) {
                 rowData.timerValue = timerService.getFormattedElapsedTime(stopwatchId);
                 holder.timerValue.setText(rowData.timerValue);
                 customHandler.postDelayed(this, 0);
