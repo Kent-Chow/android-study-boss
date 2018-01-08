@@ -60,11 +60,6 @@ public class TimerActivity extends ListActivity {
         Log.d("DEBUG", "onCreate() was called!");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer);
-
-//        if (savedInstanceState != null) {
-//            list = savedInstanceState.getParcelableArrayList("list");
-//        }
-
         startService(new Intent(this, TimerService.class));
         bindTimerService();
     }
@@ -115,13 +110,10 @@ public class TimerActivity extends ListActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-//        outState.putParcelableArrayList("list", list);
-//        Log.d("DEBUG", "State saved in bundle!");
     }
 
     @Override
     protected void onPause() {
-        Log.d("DEBUG", "onPause() was called!");
         super.onPause();
         SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
         SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
@@ -133,18 +125,8 @@ public class TimerActivity extends ListActivity {
 
     @Override
     protected void onResume() {
-        Log.d("DEBUG", "onResume() was called!");
         super.onResume();
-        SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
-        Gson gson = new Gson();
-
-        String json = appSharedPrefs.getString("list", "");
-        Type type = new TypeToken<List<RowData>>() {}.getType();
-        list = gson.fromJson(json, type);
-
-        if (list == null) {
-            list = new ArrayList<>();
-        }
+        bindTimerService();
     }
 
     private RowData getRowData(int position) {
@@ -152,7 +134,6 @@ public class TimerActivity extends ListActivity {
     }
 
     private void addTimer() {
-        Log.d("DEBUG", "addTimer() was called!");
         list.add(new RowData(getResources().getString(R.string.timer_string)));
         timerService.addStopwatch();
         timerAdapter.notifyDataSetChanged();
@@ -218,7 +199,6 @@ public class TimerActivity extends ListActivity {
     }
 
     public boolean deleteTimerAction(int position) {
-        // TODO: Clean up delete
         list.remove(position);
         timerService.removeStopwatch(position);
         timerAdapter.notifyDataSetChanged();
