@@ -57,7 +57,6 @@ public class TimerActivity extends ListActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("DEBUG", "onCreate() was called!");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer);
         startService(new Intent(this, TimerService.class));
@@ -126,7 +125,7 @@ public class TimerActivity extends ListActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        bindTimerService();
+        init();
     }
 
     private RowData getRowData(int position) {
